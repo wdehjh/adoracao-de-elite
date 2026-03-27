@@ -6,6 +6,9 @@ st.set_page_config(page_title="Compositor de Elite", page_icon="🎼")
 st.title("🎼 Compositor de Elite - Glória de Deus")
 st.markdown("### Gere prompts de vídeo 8K e louvores automaticamente!")
 
+# Criamos as variáveis vazias antes para evitar o NameError
+texto_biblico = ""
+
 with st.sidebar:
     st.header("Configurações")
     livro = st.text_input("Livro (em inglês, ex: psalms):", "psalms")
@@ -18,19 +21,21 @@ if st.button("🚀 GERAR LOUVOR E PROMPT"):
         try:
             url = f"https://bible-api.com/{livro}+{capitulo}:{versiculo}"
             response = requests.get(url)
-            texto_biblico = response.json()['text']
+            data = response.json()
             
-            st.success("Versículo encontrado!")
-            st.write(f"**Texto:** {texto_biblico}")
-            
-            st.subheader("🎬 Prompt para Vídeo (Copie para o Grok/Runway):")
-            prompt = f"8k photorealistic masterpiece, cinematic lighting, professional studio, {texto_biblico.strip()}, atmospheric, high fidelity --ar 16:9"
-            st.code(prompt)
-            
-            st.subheader("🎵 Estrutura do Louvor:")
-            st.write(f"Estilo: {estilo}")
-            st.info(f"Use o prompt acima no seu gerador de vídeo e música!")
-            
-        except:
-            st.error("Erro ao buscar versículo. Verifique se o nome do livro está em inglês.")
-Q
+            if 'text' in data:
+                texto_biblico = data['text']
+                st.success("Versículo encontrado!")
+                st.write(f"**Texto:** {texto_biblico}")
+                
+                st.subheader("🎬 Prompt para Vídeo (8K Photorealistic):")
+                prompt = f"8k photorealistic masterpiece, cinematic lighting, professional studio, {texto_biblico.strip()}, atmospheric, high fidelity --ar 16:9"
+                st.code(prompt)
+                
+                st.subheader("🎵 Estrutura do Louvor:")
+                st.write(f"Estilo: {estilo}")
+            else:
+                st.error("Versículo não encontrado. Verifique os dados.")
+                
+        except Exception as e:
+            st.error(f"Erro na conexão: {e}")
